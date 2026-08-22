@@ -20,7 +20,7 @@ interface AskHealthResponse {
 export async function askHealth(
   question: string
 ): Promise<HealthAnswer> {
-  const response = await fetch(`${API_URL}/ask`, {
+  const response = await fetch(`${API_URL}/api/ask`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

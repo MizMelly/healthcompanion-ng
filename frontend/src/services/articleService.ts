@@ -28,7 +28,7 @@ interface ArticleResponse {
 }
 
 export async function getArticles(): Promise<Article[]> {
-  const response = await fetch(`${API_URL}/articles`);
+  const response = await fetch(`${API_URL}/api/articles`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch articles");
@@ -44,7 +44,7 @@ export async function getArticle(
   language = "en"
 ): Promise<ArticleDetails> {
   const response = await fetch(
-    `${API_URL}/articles/${slug}?language=${language}`
+    `${API_URL}/api/articles/${encodeURIComponent(slug)}?language=${encodeURIComponent(language)}`
   );
 
   if (!response.ok) {
