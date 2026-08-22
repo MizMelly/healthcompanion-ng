@@ -192,7 +192,7 @@ ${context}
     try {
       const response =
         await ai.models.generateContent({
-          model: "gemini-3.7-flash",
+          model: "gemini-3.1-flash-lite",
           contents: prompt,
           config: {
             maxOutputTokens: 500,
