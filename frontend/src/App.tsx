@@ -9,6 +9,7 @@ import ArticlesPage from "./pages/ArticlesPage";
 import ArticleDetailsPage from "./pages/ArticleDetailsPage";
 import AskHealthPage from "./pages/AskHealthPage";
 import TopicsPage from "./pages/TopicsPage";
+import FeaturedSection from "./components/FeaturedSection";
 
 
 function Home() {
@@ -16,6 +17,7 @@ function Home() {
     <>
       <Hero />
       <TopicsSection />
+      <FeaturedSection />
       <AskHealthSection />
       <LatestArticles />
     </>
