@@ -89,7 +89,7 @@ export default function TopicsSection() {
             return (
               <Link
                 key={topic.name}
-                to={`/articles?topic=${topic.slug}`}
+                to={`/articles?topic=${encodeURIComponent(topic.name)}`}
                 className="group flex min-h-47.5 flex-col rounded-[1.35rem] border border-stone-200 bg-white p-5 shadow-sm shadow-stone-900/5 transition duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg hover:shadow-stone-900/8 sm:min-h-51.25"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-900">
