@@ -1,106 +1,65 @@
-import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowRight, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const exampleQuestions = [
   "How can I prevent malaria?",
   "What should I do if my child has a fever?",
-  "What should I do for a minor burn?",
+  "How should I treat a minor burn?",
 ];
 
 export default function AskHealthSection() {
   return (
-    <section className="bg-[#f3f8f4] py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-        <div className="overflow-hidden rounded-4xl bg-emerald-800">
-          <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
-            
-            {/* Content */}
-            <div className="px-6 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-16">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-emerald-100">
-                <Sparkles size={23} />
-              </div>
+    <section className="bg-[#fbf8f1] px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="rounded-4xl border border-emerald-100 bg-emerald-50 px-5 py-12 text-center sm:rounded-[2.5rem] sm:px-8 sm:py-16 lg:px-12">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-600">
+            Ask HealthCompanion
+          </p>
 
-              <p className="mt-6 text-sm font-bold uppercase tracking-[0.16em] text-emerald-200">
-                Health information assistant
-              </p>
+          <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-emerald-950 sm:text-4xl">
+            Have a health question?
+          </h2>
 
-              <h2 className="mt-3 max-w-xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                Have a health question?
-              </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-stone-600">
+            Ask about the health topics in our library and get a simple answer
+            based on published HealthCompanion content.
+          </p>
 
-              <p className="mt-5 max-w-xl text-base leading-7 text-emerald-100">
-                Ask a question about the health topics in our library and get a
-                simple answer based on published HealthCompanion content.
-              </p>
+          <div className="mx-auto mt-9 flex max-w-3xl flex-col gap-3 rounded-[1.6rem] bg-white p-2 shadow-lg shadow-emerald-950/10 sm:flex-row sm:items-center sm:rounded-full">
+            <div className="flex min-h-14 flex-1 items-center px-5 text-left text-sm text-stone-500 sm:text-base">
+              e.g. How can I prevent malaria?
+            </div>
 
+            <Link
+              to="/ask"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-900 px-6 py-4 text-sm font-bold text-white transition hover:bg-emerald-800 sm:shrink-0"
+            >
+              Ask HealthCompanion
+              <ArrowRight size={17} />
+            </Link>
+          </div>
+
+          <div className="mx-auto mt-6 flex max-w-3xl flex-wrap justify-center gap-3">
+            {exampleQuestions.map((question) => (
               <Link
+                key={question}
                 to="/ask"
-                className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50"
+                className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600 shadow-sm transition hover:border-emerald-200 hover:text-emerald-800"
               >
-                <MessageCircle size={18} />
-                Ask HealthCompanion
-                <ArrowRight size={17} />
+                {question}
               </Link>
+            ))}
+          </div>
 
-              <p className="mt-5 max-w-lg text-xs leading-5 text-emerald-200">
-                HealthCompanion provides health education based on its
-                published content. It does not replace professional medical
-                care.
-              </p>
-            </div>
-
-            {/* Question preview */}
-            <div className="relative flex items-center bg-emerald-900/40 px-6 py-10 sm:px-10 lg:px-12">
-              <div className="w-full rounded-2xl border border-white/10 bg-white p-5 shadow-2xl">
-                
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-                    <MessageCircle size={18} />
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">
-                      Ask a question
-                    </p>
-
-                    <p className="text-xs text-slate-500">
-                      Get information from our health library
-                    </p>
-                  </div>
-                </div>
-
-                {/* Input preview */}
-                <div className="mt-5 rounded-xl border border-slate-200 px-4 py-3">
-                  <p className="text-sm text-slate-400">
-                    e.g. How can I prevent malaria?
-                  </p>
-                </div>
-
-                <button className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white">
-                  Ask question
-                  <ArrowRight size={16} />
-                </button>
-
-                {/* Example questions */}
-                <div className="mt-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Try asking
-                  </p>
-
-                  <div className="mt-3 space-y-2">
-                    {exampleQuestions.map((question) => (
-                      <div
-                        key={question}
-                        className="rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-slate-600"
-                      >
-                        {question}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          <div className="mx-auto mt-8 flex max-w-xl items-start gap-3 rounded-2xl border border-stone-200/80 bg-[#fbfaf5] px-4 py-4 text-left text-sm leading-6 text-stone-600 sm:px-5">
+            <Info
+              size={17}
+              className="mt-0.5 shrink-0 text-emerald-600"
+            />
+            <p>
+              HealthCompanion provides health education and does not replace
+              professional medical care.
+            </p>
           </div>
         </div>
       </div>

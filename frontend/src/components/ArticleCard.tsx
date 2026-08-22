@@ -1,13 +1,13 @@
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-interface ArticleCardProps {
+type ArticleCardProps = {
   title: string;
-  topic: string;
+  topic?: string | null;
   summary: string;
   date: string;
   slug: string;
-}
+};
 
 export default function ArticleCard({
   title,
@@ -17,38 +17,37 @@ export default function ArticleCard({
   slug,
 }: ArticleCardProps) {
   return (
-    <article className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg hover:shadow-slate-900/5">
-      <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
-          {topic}
-        </span>
+    <Link
+      to={`/articles/${slug}`}
+      className="group flex min-h-57.5 flex-col rounded-[1.35rem] border border-stone-200 bg-white p-5 shadow-sm shadow-stone-900/5 transition duration-200 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg"
+    >
+      <div className="rounded-full bg-emerald-100 px-3 py-1">
+        <p className="truncate text-xs font-extrabold uppercase tracking-[0.14em] text-emerald-900">
+          {topic ?? "Health"}
+        </p>
       </div>
 
-      <h3 className="mt-5 text-lg font-bold leading-7 text-slate-900">
+      <h3 className="mt-5 text-lg font-extrabold leading-6 text-emerald-950">
         {title}
       </h3>
 
-      <p className="mt-3 flex-1 text-sm leading-6 text-slate-500">
+      <p className="mt-3 line-clamp-2 text-sm leading-6 text-stone-500">
         {summary}
       </p>
 
-      <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-          <CalendarDays size={14} />
-          {date}
-        </div>
+      <div className="mt-auto border-t border-stone-200 pt-4">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs text-stone-500">Published {date}</p>
 
-        <Link
-          to={`/articles/${slug}`}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 transition group-hover:text-emerald-800"
-        >
-          Read article
-          <ArrowRight
-            size={15}
-            className="transition-transform group-hover:translate-x-0.5"
-          />
-        </Link>
+          <span className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-emerald-600">
+            Read article
+            <ArrowRight
+              size={16}
+              className="transition group-hover:translate-x-1"
+            />
+          </span>
+        </div>
       </div>
-    </article>
+    </Link>
   );
 }

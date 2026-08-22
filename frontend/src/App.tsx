@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Hero from "./components/Hero";
 import TopicsSection from "./components/TopicsSection";
 import AskHealthSection from "./components/AskHealthSection";
@@ -26,6 +27,7 @@ function App() {
   return (
     <BrowserRouter>
       <Navbar />
+      
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -34,6 +36,7 @@ function App() {
         <Route path="/articles/:slug" element={<ArticleDetailsPage />} />
         <Route path="/ask" element={<AskHealthPage />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }
