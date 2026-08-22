@@ -84,21 +84,27 @@ export async function findRelevantArticles(
         ].join(" ")
       );
 
+      const normalizedTitle =
+        normalize(articleTitle);
+
+      const normalizedTopic =
+        normalize(article.topic);
+
       let score = 0;
 
       for (const word of questionWords) {
-        // Match anywhere in the article content.
+        // Match in the article content.
         if (searchableText.includes(word)) {
           score += 1;
         }
 
-        // Give article titles more importance.
-        if (normalize(articleTitle).includes(word)) {
+        // Give title matches more importance.
+        if (normalizedTitle.includes(word)) {
           score += 3;
         }
 
-        // Give topics extra importance.
-        if (normalize(article.topic).includes(word)) {
+        // Give topic matches extra importance.
+        if (normalizedTopic.includes(word)) {
           score += 2;
         }
       }
@@ -118,6 +124,14 @@ export async function findRelevantArticles(
 /**
  * Generate a health answer using only the
  * relevant HealthCompanion articles.
+ *
+ * Primary model:
+ *   gemini-3.1-flash-lite
+ *
+ * Fallback model:
+ *   gemini-2.5-flash
+ *
+ * Temporary Gemini errors are retried automatically.
  */
 async function generateHealthAnswer(
   question: string,
@@ -140,9 +154,11 @@ async function generateHealthAnswer(
       (article, index) => `
 SOURCE ${index + 1}
 
-Title: ${article.title ?? "Untitled"}
+Title:
+${article.title ?? "Untitled"}
 
-Topic: ${article.topic}
+Topic:
+${article.topic}
 
 Summary:
 ${article.summary ?? ""}
@@ -182,75 +198,116 @@ HealthCompanion published content:
 ${context}
 `;
 
-  const maxRetries = 3;
+  /*
+   * Try the primary model first.
+   * If it is temporarily unavailable,
+   * automatically try the fallback model.
+   */
+  const models = [
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash",
+  ];
 
-  for (
-    let attempt = 1;
-    attempt <= maxRetries;
-    attempt++
-  ) {
-    try {
-      const response =
-        await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt,
-          config: {
-            maxOutputTokens: 500,
-          },
-        });
+  /*
+   * Temporary errors that are safe to retry:
+   *
+   * 429 = Too many requests / rate limit
+   * 500 = Internal server error
+   * 503 = Service unavailable / high demand
+   */
+  const retryableStatuses = new Set([
+    429,
+    500,
+    503,
+  ]);
 
-      const answer = response.text?.trim();
+  for (const model of models) {
+    const maxRetries = 2;
 
-      if (!answer) {
-        throw new Error(
-          "Gemini returned an empty response"
+    for (
+      let attempt = 1;
+      attempt <= maxRetries;
+      attempt++
+    ) {
+      try {
+        console.log(
+          `Trying Gemini model: ${model} (attempt ${attempt}/${maxRetries})`
         );
-      }
 
-      return answer;
-    } catch (error: any) {
-      const status = error?.status;
+        const response =
+          await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+              maxOutputTokens: 500,
+            },
+          });
 
-      console.error(
-        `Gemini request failed (attempt ${attempt}/${maxRetries}):`,
-        error
-      );
+        const answer = response.text?.trim();
 
-      /*
-       * These errors can be temporary:
-       *
-       * 500 = Internal server error
-       * 503 = Service unavailable / high demand
-       * 429 = Rate limit
-       */
-      const shouldRetry =
-        status === 500 ||
-        status === 503 ||
-        status === 429;
-
-      if (
-        shouldRetry &&
-        attempt < maxRetries
-      ) {
-        const delay = attempt * 2000;
+        if (!answer) {
+          throw new Error(
+            "Gemini returned an empty response"
+          );
+        }
 
         console.log(
-          `Retrying Gemini request in ${delay}ms...`
+          `Gemini response successful using ${model}`
         );
 
-        await new Promise((resolve) =>
-          setTimeout(resolve, delay)
+        return answer;
+      } catch (error: unknown) {
+        const status =
+          typeof error === "object" &&
+          error !== null &&
+          "status" in error
+            ? (error as { status?: number }).status
+            : undefined;
+
+        console.error(
+          `Gemini ${model} failed (attempt ${attempt}/${maxRetries}):`,
+          error
         );
 
-        continue;
+        /*
+         * Retry temporary Gemini errors.
+         */
+        if (
+          status !== undefined &&
+          retryableStatuses.has(status) &&
+          attempt < maxRetries
+        ) {
+          const delay = attempt * 2000;
+
+          console.log(
+            `Retrying ${model} in ${delay}ms...`
+          );
+
+          await new Promise((resolve) =>
+            setTimeout(resolve, delay)
+          );
+
+          continue;
+        }
+
+        /*
+         * If this model has failed after all retries,
+         * move to the next model.
+         */
+        console.error(
+          `Model ${model} is unavailable.`
+        );
+
+        break;
       }
-
-      throw error;
     }
   }
 
+  /*
+   * Both models failed.
+   */
   throw new Error(
-    "Unable to generate a health answer at this time."
+    "All Gemini models are temporarily unavailable. Please try again later."
   );
 }
 
@@ -260,8 +317,24 @@ ${context}
 export async function askHealthQuestion(
   question: string
 ) {
+  /*
+   * Clean the question before searching.
+   */
+  const cleanQuestion = question.trim();
+
+  if (!cleanQuestion) {
+    return {
+      answer:
+        "Please enter a health question so I can help you.",
+      sources: [],
+    };
+  }
+
+  /*
+   * Find relevant published articles.
+   */
   const matches = await findRelevantArticles(
-    question
+    cleanQuestion
   );
 
   /*
@@ -275,15 +348,24 @@ export async function askHealthQuestion(
     };
   }
 
+  /*
+   * Extract the actual articles.
+   */
   const articles = matches.map(
     ({ article }) => article
   );
 
+  /*
+   * Generate the answer using Gemini.
+   */
   const answer = await generateHealthAnswer(
-    question,
+    cleanQuestion,
     articles
   );
 
+  /*
+   * Return article references to the frontend.
+   */
   const sources = articles.map((article) => ({
     id: article.id,
     slug: article.slug,
